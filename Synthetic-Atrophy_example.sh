@@ -6,10 +6,7 @@ set -x
 # VTK:  https://vtk.org/download/
 # ITK:  https://itk.org/download/
 
-
-ROOT= # this is the directory where you cloned the git repository into
-WDIR=$ROOT/Synthetic-Atrophy-For-Longtidunal-Cortical-Surface-Analyses
-mkdir -p $WDIR
+WDIR=Synthetic-Atrophy-For-Longtidunal-Cortical-Surface-Analyses
 
 
 # External tools you will need to run this example:
@@ -20,26 +17,27 @@ imagemath= # (https://github.com/NIRALUser/niral_utilities/tree/master/ImageMath
 holedetection= # (https://www.insight-journal.org/browse/publication/43)
 
 
-# Synthetic-Atrophy tools (you will have to manually add the paths in place of <$DIR> for the executables once you compile them all)
-distanceBetweenSurfaces=<$DIR>/distanceBetweenSurfaces
-fillholes=<$DIR>/FillHoles
-getBlurMask=<$DIR>/getBlurMask
-getTrimRegion=<$DIR>/getTrimRegion
-maskField=<$DIR>/maskField
-padImage=<$DIR>/padImage
-padVectorImage=<$DIR>/padVectorImage
-parcellateAtrophyRegion=<$DIR>/parcellateAtrophyRegion
-performErosion=<$DIR>d/performErosion
-readMeshArray=<$DIR>/readMeshArray
-trimFloatImage=<$DIR>/trimFloatImage
-trimImage=<$DIR>/trimImage
-warpSurfaces=<$DIR>/warpSurfs
-VTK2VTP=<$DIR>/VTK2VTP
-VTP2VTK=<$DIR>/VTP2VTK
+# Synthetic-Atrophy tools
+distanceBetweenSurfaces=$WDIR/bin/distanceBetweenSurfaces
+getBlurMask=$WDIR/bin/getBlurMask
+getTrimRegion=$WDIR/bin/getTrimRegion
+maskField=$WDIR/bin/maskField
+padImage=$WDIR/bin/padImage
+padVectorImage=$WDIR/bin/padVectorImage
+parcellateAtrophyRegion=$WDIR/bin/parcellateAtrophyRegion
+performErosion=$WDIR/bind/performErosion
+readMeshArray=$WDIR/bin/readMeshArray
+trimFloatImage=$WDIR/bin/trimFloatImage
+trimImage=$WDIR/bin/trimImage
+warpSurfaces=$WDIR/bin/warpSurfs
+VTK2VTP=$WDIR/bin/VTK2VTP
+VTP2VTK=$WDIR/bin/VTP2VTK
 
 
 
-
+#########################
+##  Utility functions  ##
+#########################
 
 # Crops an image and upsamples to 400%
 function highRes_crop(){
@@ -60,7 +58,7 @@ function highRes_crop(){
 }
 
 
-
+# Remove handles on surfaces
 function Remove-Handles(){
     dir=${1?}
     mkdir -p $dir
@@ -109,7 +107,7 @@ function Remove-Handles(){
 }
 
 
-
+# Convert input image to surface mesh
 function Get-Mesh(){
     inputImage=$1
     outputMesh=$2
@@ -127,6 +125,7 @@ function Get-Mesh(){
 }
 
 
+# Transform image w/ new orientation and origin
 function Change-Image-Space(){
     input=$1
     output=$2
@@ -141,7 +140,9 @@ function Change-Image-Space(){
 
 
 
-
+############
+##  Main  ##
+############
 
 function main {
     ######################################
@@ -342,9 +343,9 @@ function main {
     
     
     
-    #################################
-    ##    Create synthetic data    ##
-    #################################
+    #######################################
+    ##    Create synthetic image data    ##
+    ######################################
     
     # Apply warp to T1 image
     T1_atrophy=$RESULTS_DIR/T1-atrophy.nii.gz
@@ -355,9 +356,9 @@ function main {
 
 
 
-    ####################################
-    ##    Measure thickness change    ##
-    ####################################
+    ###############################
+    ##    Create surface data    ##
+    ###############################
 
     # Make label map for ROI
     labelMask_original_dataSpace=$ROI_DIR/label_original_dataSpace.nii.gz
@@ -407,6 +408,11 @@ function main {
     $warpSurfaces $GM_rh_mesh_original ${field_inverse_outbase}_maskBlur_pad.nii.gz $MASK_DIR/blurMask.nii.gz $GM_rh_mesh_atrophy 0 0
 
 
+
+    ####################################
+    ##    Measure thickness change    ##
+    ####################################
+    
     # Get distance between surfaces
     WM_lh_mesh_original_surfaceDistance=$SURFACE_DIR/WM_lh_original_surfaceDistance.vtp
     WM_rh_mesh_original_surfaceDistance=$SURFACE_DIR/WM_rh_original_surfaceDistance.vtp
